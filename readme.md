@@ -6,7 +6,7 @@ Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
 
 ## Step 1: Audio Loop-Back Through Linux
 
-In this step was wrote in VHDL two IPs: Audio To Axi and Axi To Audio. Also, we wrote the Audio Copy Driver.
+In this step We  wrote two IPs in VHDL : Audio To Axi and Axi To Audio components that we used in our design. Also, we wrote the Audio Copy Driver.
 The audio analog signal is taken by the board through the [Audio IP][1] given by the lecturer. This IP is an interface for connecting the ADAU1761 audio codecs
 
 ### Audio To Axi
