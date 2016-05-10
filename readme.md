@@ -17,6 +17,9 @@ After audio driver copied data from input to data ,This Ip takes the process in 
 This Linux driver's task is just to copy data from input to output.
 
 ## Step 2: Receive Audio Over Network in Linux and Play it Back
+In this step of the project ,we wrote  a new audio driver which will have capable of getting audio over network.When we are creating this driver and component design , because of audio broadcast is using UDP protocol we created our driver accordingly.For networking
+to work properly there was a script supplied by lab assistants.
+The script help change the MAC and IP address.
 
 ## Step 3: Mixing the Two Streams, Multi-Threading
 
