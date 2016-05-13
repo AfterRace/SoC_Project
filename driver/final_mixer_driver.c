@@ -7,7 +7,6 @@
 * Author: Massimo, Eyyupt, Martin
 */
   
-//C
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,11 +23,27 @@
 #define PORT 7891
 #define BUFFER_SIZE 256
 
+#define DEBUG 0
+
+/* File descriptor for pipe fifo implementation. 
+ * Has to be global to can be accessed from all threads.
+ */
 int pipe_fd[2];
 
+/*
+ * Checks if the user input is a valid fitler setting.
+ *
+ * @param:
+ * char *filter_setting: Address to the user input
+ * 
+ * @return:
+ * Error code: 0 - normal exit, 1 - error
+ */
 int check_filter_error(char *filter_setting){
 	int i;
-	//printf("Debug string passed: %s\n",filter_setting);
+	#if DEBUG
+		printf("Debug string passed: %s\n",filter_setting);
+	#endif
 	if (strlen(filter_setting) != 3){
 		printf("The string has to be long 3 char\n");
 		return 1;
@@ -41,10 +56,16 @@ int check_filter_error(char *filter_setting){
 	}
 	return 0;
 } 
-  
-void* fifo_read_thread () {
-	printf("fifo read thread started\n");
 
+/*
+ * Thread 
+ * Reads data from the fifo (4 Byte blocks) and writes it to the AXI device on channel 0. 
+ */
+void* fifo_read_thread () {
+	#if DEBUG
+		printf("fifo read thread started\n");
+	#endif
+	
 	/* Open the AXI to Audio device via /dev/mem mapping */
         int fd_dst0 = open ("/dev/mem", O_RDWR);
         if (fd_dst0 < 1) { perror("Error open /dev/mem/");} 
@@ -62,19 +83,26 @@ void* fifo_read_thread () {
 		DST0_R = sample;
 	}   
 
-        //unmap
+        // unmap
         munmap(ptr_dst0, pageSize);
 }
 
+/*
+ * Thread 
+ * Receives UDP network packages and writes their content to the fifo (256 Byte blocks)
+ */
 void* fifo_write_thread () {
-	printf("fifo write thread started\n");
-
+	#if DEBUG
+		printf("fifo write thread started\n");
+	#endif
 	/* Sets up UDP broadcast client. */   
 	int udp = udp_client_setup(BROADCAST_ADR, PORT);
     	if (udp) { perror("Error setup udp client"); } 
 
 	/* Run receive loop for ever */
-	printf("Beginn receiving network data and writing to fifo\n");
+	#if DEBUG
+		printf("Beginn receiving network data and writing to fifo\n");
+	#endif
 	unsigned buffer[BUFFER_SIZE/4];
 	while (1){		
 		int recv_ret = udp_client_recv(buffer, BUFFER_SIZE );
@@ -87,9 +115,14 @@ void* fifo_write_thread () {
 	} 
 }
 
+/*
+ * Thread 
+ * Reads data from the AXI device (line in) and writes it to the AXI device on channel 1. 
+ */
 void* copy_thread () {
-	printf("copy thread started\n");
-
+	#if DEBUG
+		printf("copy thread started\n");
+	#endif
 	/* Open the devices */
         /* For Audio to AXI use the uio_prdv_genirq driver (load kernel module before) */
         int fd_src = open ("/dev/uio0", O_RDWR);	// open dev/uio0
@@ -109,7 +142,7 @@ void* copy_thread () {
            
         int IRQEnable = 1; // Enable Interrupts
  	write(fd_src, &IRQEnable, sizeof(IRQEnable));
-         
+     
  
   	/* Copy data in infinity loop */ 
 	while(1) {	
@@ -134,7 +167,7 @@ int main(int argc, char *argv[])
         int fd = open ("/dev/mem", O_RDWR);    //open /dev/mem file
         if (fd < 1) { perror("Error open /dev/mem/");} 
 
-	/* Perform the memory mappings */
+	/* Perform the memory mappings for the Volume and Filter devices*/
         unsigned pageSize = sysconf(_SC_PAGESIZE);         //get architecture specific page size  
         void *ptr_filter0;
   	ptr_filter0 = mmap(NULL, pageSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, FILTER0_ADR);
@@ -145,39 +178,37 @@ int main(int argc, char *argv[])
         void *ptr_volume1;
   	ptr_volume1 = mmap(NULL, pageSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, VOLUME1_ADR);
 
-
+	/*
+	 * INIT Filter and Volume IPs 
+	/*
 	/* Filer coefficients */
 	unsigned LP_Coef_b0 = 0x00002CB6;
 	unsigned LP_Coef_b1 = 0x0000596C;
 	unsigned LP_Coef_b2 = 0x00002CB6;
 	unsigned LP_Coef_a1 = 0x8097A63A;
 	unsigned LP_Coef_a2 = 0x3F690C9D;
-
 	unsigned BP_Coef_b0 = 0x074D9236;
 	unsigned BP_Coef_b1 = 0x00000000;
 	unsigned BP_Coef_b2 = 0xF8B26DCA;
 	unsigned BP_Coef_a1 = 0x9464B81B;
 	unsigned BP_Coef_a2 = 0x3164DB93;
-
 	unsigned HP_Coef_b0 = 0x12BEC333;
 	unsigned HP_Coef_b1 = 0xDA82799A;
 	unsigned HP_Coef_b2 = 0x12BEC333;
 	unsigned HP_Coef_a1 = 0x00000000;
 	unsigned HP_Coef_a2 = 0x0AFB0CCC;
-
+	
         /* Write FILTER0 coefficients */
         FILTER0_REG_0 = LP_Coef_b0;
         FILTER0_REG_1 = LP_Coef_b1;   
         FILTER0_REG_2 = LP_Coef_b2;
         FILTER0_REG_3 = LP_Coef_a1;
-        FILTER0_REG_4 = LP_Coef_a2;    
-
+        FILTER0_REG_4 = LP_Coef_a2; 
         FILTER0_REG_5 = BP_Coef_b0;
         FILTER0_REG_6 = BP_Coef_b1;   
         FILTER0_REG_7 = BP_Coef_b2;
         FILTER0_REG_8 = BP_Coef_a1;
         FILTER0_REG_9 = BP_Coef_a2; 
-
         FILTER0_REG_10 = HP_Coef_b0;
         FILTER0_REG_11 = HP_Coef_b1;   
         FILTER0_REG_12 = HP_Coef_b2;
@@ -187,8 +218,7 @@ int main(int argc, char *argv[])
 	/* Reset FILTER0 */
 	FILTER0_REG_15 = 1;
 	FILTER0_REG_15 = 0;
-
-	/* Enter sample mode */
+	/* Enter FILTER0 sample mode */
 	FILTER0_REG_16 = 1;
 
         /* Write FILTER1 coefficients */
@@ -197,13 +227,11 @@ int main(int argc, char *argv[])
         FILTER1_REG_2 = LP_Coef_b2;
         FILTER1_REG_3 = LP_Coef_a1;
         FILTER1_REG_4 = LP_Coef_a2; 
-
         FILTER1_REG_5 = BP_Coef_b0;
         FILTER1_REG_6 = BP_Coef_b1;   
         FILTER1_REG_7 = BP_Coef_b2;
         FILTER1_REG_8 = BP_Coef_a1;
-        FILTER1_REG_9 = BP_Coef_a2; 
-
+        FILTER1_REG_9 = BP_Coef_a2;
         FILTER1_REG_10 = HP_Coef_b0;
         FILTER1_REG_11 = HP_Coef_b1;   
         FILTER1_REG_12 = HP_Coef_b2;
@@ -213,15 +241,15 @@ int main(int argc, char *argv[])
 	/* Reset FILTER1 */
 	FILTER1_REG_15 = 1;
 	FILTER1_REG_15 = 0;
-
-	/* Enter sample mode */
+	/* Enter FILTER1 sample mode */
 	FILTER1_REG_16 = 1;
 
-	/* Setting Volume */
+	/* Setting Volume default values */
 	VOLUME0_REG_0 = 256;
 	VOLUME0_REG_1 = 256;
 	VOLUME1_REG_0 = 256;
 	VOLUME1_REG_1 = 256;
+	
 
 	/* Create a FIFO for communication */
 	int ret_val = pipe(pipe_fd);
@@ -240,25 +268,27 @@ int main(int argc, char *argv[])
 
 	printf("Initialization finished...\n");
 
-	/* Run receive loop for ever */
+	/* Infinitiy Loop that implements the User Interface */
 	while (1){	
-		printf("Select the channel to change:\n");
+		printf("\nSelect the channel to change:\n");
 		printf("0 : for network channel\n");
 		printf("1 : for line in channel\n"); 
+		printf("> "); 		
 		char channel = getchar();
 		getchar();
 		if (channel != '0' && channel != '1') {
 			printf("Unknown channel\n");
 		}			
-		printf("Select the setting to change:\n");
+		printf("\nSelect the setting to change:\n");
 		printf("V : for volume control\n");
-		printf("F : for FILTER0 control\n"); 
-		printf("L : for list of settings\n");
+		printf("F : for filter control\n"); 
+		printf("L : for list of current settings\n");
+		printf("> "); 		
 		int setting = getchar();
 		getchar();
 		if (setting=='V') {
 			int volume;
-			printf("Enter the value for the volume [0 - 4096]> ");
+			printf("\nEnter the value for the volume [0 - 4096]> ");
 			scanf("%d",&volume);
 			getchar();
 			if ( volume >= 0 && volume <= 4096){
@@ -276,7 +306,7 @@ int main(int argc, char *argv[])
 		}
 		else if (setting=='F') {
 			char filter_setting[1024];
-			printf("Enter the filter value [LBH]> ");
+			printf("\nEnter the filter value [LBH]> ");
 			scanf("%s",&filter_setting);
 			getchar();
 			if (check_filter_error(filter_setting) == 0){
@@ -296,7 +326,7 @@ int main(int argc, char *argv[])
 		}
 		else if (setting == 'L'){
 			if (channel == '0'){
-				printf("List of setting of network channel:\n");
+				printf("\nList of setting of network channel:\n");
 				printf("Volume LEFT: %d\n",VOLUME0_REG_0);
 				printf("Volume RIGHT: %d\n",VOLUME0_REG_1);
 				printf("Low Pass Filter: ");
@@ -316,7 +346,7 @@ int main(int argc, char *argv[])
 					printf("OFF\n");
 			}
 			else {
-				printf("List of setting of line in channel:\n");
+				printf("\nList of setting of line in channel:\n");
 				printf("Volume LEFT: %d\n",VOLUME1_REG_0);
 				printf("Volume RIGHT: %d\n",VOLUME1_REG_1);
 				printf("Low Pass Filter: ");
@@ -342,7 +372,8 @@ int main(int argc, char *argv[])
 		}
 	
 	} 
-	/* Wait for threads to end */
+	
+	/* Wait for others threads to end */
 	pthread_join(r_thread, NULL); 
 	pthread_join(w_thread, NULL); 
 	pthread_join(c_thread, NULL); 
