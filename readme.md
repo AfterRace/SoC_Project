@@ -61,12 +61,12 @@ In this step We  wrote two IPs in VHDL : Audio To Axi and Axi To Audio component
 The audio analog signal is taken by the board through the [Audio IP][1] given by the lecturer. This IP is an interface for connecting the ADAU1761 audio codecs
 
 #### Audio To Axi
-By creating this Ip we intended to convert  audio into information on AXI bus.
+We created this custom intellectual property our own selves.After creation process in vivado environment ,We created vhdl file for this specific IP then edited the code such a way which will take audio as an input then provide output to on AXI bus. By creating this Ip we intended to convert audio into information on AXI bus.
 #### Axi To Audio
 After audio driver copied data from input to data ,This Ip takes the process in Audio to Axi backward and information is converted to audio which we can listen by our headphones.
 #### Audio Copy Driver
-This Linux driver's task is just to copy data from the input to output. The first thing that we did it was access to the devices that we created before.
-To do this we used '/dev/uio0' for the Audio to AXI device because it need to handle interrupt, and we used '/dev/mem' for the AXI to Audio because in this case we did not need to use interrupt. After mapping the device, we repeated in a loop these instructions: we enabled the interrupt for the Audio To AXI, we waited the interrupt and we copied the content of the Audio To Axi registers to the AXI to Audio registers. In this way we transferred  the audio from the line in to the headphone out ports of the ZedBoard.
+This Linux driver's task is just to copy data from the input to output. The first thing that we did it was to access the devices that we created before.
+To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupt, and we used '/dev/mem' for the AXI to Audio because in this case , interrupt is not required. After mapping the device, we repeated in a loop these instructions: we enabled the interrupt for the Audio To AXI, we waited the interrupt then  we copied the content of the Audio To Axi registers to the AXI to Audio registers. In this way we transferred  the audio from the line in to the headphone out ports of the ZedBoard.
 
 ### Step 2: Receive Audio Over Network in Linux and Play it Back
 In this step of the project ,we wrote  a new audio driver which will have capable of getting audio over network.When we are creating this driver and component design , because of audio broadcast is using UDP protocol we created our driver accordingly.For networking
