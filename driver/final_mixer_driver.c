@@ -253,6 +253,7 @@ int main(int argc, char *argv[])
 		printf("Select the setting to change:\n");
 		printf("V : for volume control\n");
 		printf("F : for FILTER0 control\n"); 
+		printf("L : for list of settings\n");
 		int setting = getchar();
 		getchar();
 		if (setting=='V') {
@@ -292,6 +293,49 @@ int main(int argc, char *argv[])
 			} else
 				printf("Error in filter setting\n");
 			
+		}
+		else if (setting == 'L'){
+			if (channel == '0'){
+				printf("List of setting of network channel:\n");
+				printf("Volume LEFT: %d\n",VOLUME0_REG_0);
+				printf("Volume RIGHT: %d\n",VOLUME0_REG_1);
+				printf("Low Pass Filter: ");
+				if(FILTER0_REG_19 == 0)
+					printf("ON\n");
+				else
+					printf("OFF\n");
+				printf("Band Pass Filter: ");
+				if(FILTER0_REG_18 == 0)
+					printf("ON\n");
+				else
+					printf("OFF\n");
+				printf("High Pass Filter: ");
+				if(FILTER0_REG_17 == 0)
+					printf("ON\n");
+				else
+					printf("OFF\n");
+			}
+			else {
+				printf("List of setting of line in channel:\n");
+				printf("Volume LEFT: %d\n",VOLUME1_REG_0);
+				printf("Volume RIGHT: %d\n",VOLUME1_REG_1);
+				printf("Low Pass Filter: ");
+				if(FILTER1_REG_19 == 0)
+					printf("ON\n");
+				else
+					printf("OFF\n");
+				printf("Band Pass Filter: ");
+				if(FILTER1_REG_18 == 0)
+					printf("ON\n");
+				else
+					printf("OFF\n");
+				printf("High Pass Filter: ");
+				if(FILTER1_REG_17 == 0)
+					printf("ON\n");
+				else
+					printf("OFF\n");	
+			}
+
 		}
 		else {
 			printf("Unknown command\n");
