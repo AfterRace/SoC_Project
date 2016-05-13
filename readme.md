@@ -17,25 +17,41 @@ Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
  - References
 
 ## Introduction
+The purpose of this project is to build a audio mixer on the Zedboard running Linux. The Zedboard is built up on the Xilinx Zynq platform that combines an ARM CPU with a FPGA on one Chip. Therefore we had to develop a custom hardware design for the FPGA and write the software to control it from Linux. 
+
 
 ## Getting Started
-### Linux driver
-
- - drivers/
-   Contains the source files of the drivers.
- - 
-	   
-
-drivers/
 
 ### Hardware project
 We used Xilinx Vivado 2015.1 for the hardware design. 
  - vivado/
 	 - project/         
-	   Vivado project containing the block design
+		 - Vivado project containing the block design
 	 - ip_repo/        
-	   Used IP Cores
+		 - Used IP Cores
+ - sd-image/
+	 - Linux system
+	 - Bootloader including the bitstream for the FPGA 
+	 
+Copy all files of the sd-image/ folder to the SD card.
+	
+### Linux driver
 
+ - bin/
+	 - Contains the binaries
+	 - final_mixer_driver 
+		 - Userspace driver
+	 - uio_pdrv_genirq.ko
+		 - Kernel module for Userspace I/O
+ - drivers/
+	 - Contains the sources
+
+Copy all files of the bin/ folder to the SD card. To start the driver on the Zedboard type:
+
+    mount /dev/mmcblk0p1 /mnt
+    cd /mnt
+    insmod uio_pdrv_genirq.ko
+    ./final_mixer_driver
 
 
 ## Documentation
@@ -65,4 +81,5 @@ The script help change the MAC and IP address.
 ## References
 
 [1]: https://github.com/ems-kl/zedboard_audio "Audio IP"
+
 
