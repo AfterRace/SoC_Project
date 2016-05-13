@@ -1,8 +1,22 @@
-# SoC Project
+# SoC Project: Audio Mixer
+
+This repository stores our solution of the audio mixer project, that was part of the IAY0550 System-on-Chip Design course at Tallinn University of Technology in spring 2016.
 
 Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
 
+## Table of Contents
+
+ - Introduction
+ - Documentation
+	 - Step 1: Audio Loop-Back Through Linux
+	 - Step 2: Receive Audio Over Network in Linux and Play it Back
+	 - Step 3: Mixing the Two Streams, Multi-Threading
+	 - Step 4: Adding Filters and Volume Control
+ - Conclusion 
+ - References
+
 ## Introduction
+
 
 ## Step 1: Audio Loop-Back Through Linux
 
@@ -23,10 +37,11 @@ The script help change the MAC and IP address.
 
 ## Step 3: Mixing the Two Streams, Multi-Threading
 
-## Step 4: Resource Sharing, Adding Filters and Volume Control
+## Step 4: Adding Filters and Volume Control
 
 ## Conclusion
 
 ## References
 
 [1]: https://github.com/ems-kl/zedboard_audio "Audio IP"
+
