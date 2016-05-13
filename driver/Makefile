@@ -9,10 +9,10 @@ CC=$(CROSS_COMPILE)gcc
 all:
 	make -C ../../linux-digilent/ M=$(PWD) modules
 # let's compile the userspace program
-	$(CC) copy_driver.c -o copy_driver 
-	$(CC) -pthread receive_driver.c lib/udpclient.c -o receive_driver 
-	$(CC) -pthread mixer_driver.c lib/udpclient.c -o mixer_driver 
-	$(CC) -pthread final_mixer_driver.c lib/udpclient.c -o final_mixer_driver 
+	$(CC) copy_driver.c -o ../bin/copy_driver 
+	$(CC) -pthread receive_driver.c lib/udpclient.c -o ../bin/receive_driver 
+	$(CC) -pthread mixer_driver.c lib/udpclient.c -o ../bin/mixer_driver 
+	$(CC) -pthread final_mixer_driver.c lib/udpclient.c -o ../bin/final_mixer_driver 
 
  
 clean:
