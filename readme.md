@@ -199,7 +199,7 @@ High Pass Filter: OFF"
 Select the channel to change
 0 : for network channel
 1 : for line in channel 
-> 0
+> _
 ```
 
 #### How to enable the Debug mode 
