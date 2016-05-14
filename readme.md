@@ -84,9 +84,9 @@ To simplify this task a [library file][3] with two helper functions was provided
 
 Due to the fact that the network stream is received in 256 byte packages and one audio sample is only 4 byte big, we had to buffer the received data. We followed the provided hints and used a FIFO that is accessed from different threads to solve this problem.We created a FIFO with the [unnamed pipes][4] Linux implementation. Named pipes would have the advantage that they can be accessed from different processes, but thats not needed here, because the threads are sharing the same memory.
 In the main loop we received the packets from the server using the function _int udp_client_recv(unsigned *buffer,int buffer_size )_  and wrote them in the FIFO.
-
 To read the data from the FIFO we used a [POSIX thread][5]. The thread copies one sample a time (4 byte) from the FIFO to the AXI-to-Audio registers that are accessed via the /dev/mem/ interface. Since the audio stream is mono we copied the same sample to both channels. If the FIFO is empty the thread is waiting until new data is available.
 
+During the implementation of this step we faced some problems with the writing and reading from the FIFO. The FIFO expects char pointers (1 Byte) as parameters but the audio samples are 4 Byte big. The problems could be solved with the right casting of the pointers.
 
 #### Test
 To test it we have to configure the 
@@ -100,7 +100,7 @@ For the design part on vivado environment , we already have been supplied the Au
 After completing that part , we added the audio mixer driver into the design then connected the Axi to Audio Ips outputs as input to the audio mixer driver.The rest of the design has been kept same as the previous step and audio mixer output connected to the Audio Ip output.
 
 ### Step 4: Adding Filters and Volume Control
-The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line.
+The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop.
 
 #### How to use it
 
