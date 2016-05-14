@@ -9,7 +9,7 @@ Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
  - [Getting Started](#getting-started)
  - [Documentation](#documentation)
 	 - [Step 1: Audio Loop-Back Through Linux](#step-1-audio-loop-back-through-linux)
-	 - [Step 2: Receive Audio Over Network in Linux and Play it Back](#step-2-receive-audio-over-network-in-linux-and-play-it)
+	 - [Step 2: Receive Audio Over Network in Linux and Play it Back](#step-2-receive-audio-over-network-in-linux-and-play-it-back)
 	 - [Step 3: Mixing the Two Streams, Multi-Threading](#step-3-mixing-the-two-streams-multi-threading)
 	 - [Step 4: Adding Filters and Volume Control](#step-4-adding-filters-and-volume-control)
  - [Conclusion](#conclusion)
@@ -80,9 +80,13 @@ The audio network stream is specified as followed:
 * **Audio channels:** 1, Mono (copy one stream to both left and right channels)
 * **Audio sample format:** PCM, 4 byte samples, can be directly written to the audio IP-s input
 
-To simplify this task a library file with two helper functions was provided by the lectures.[presents int this repository](https://github.com/karljans/SoC_Design) We configured the client zu receive the broadcasted UDP packages using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_ 
+To simplify this task a [library file][3] with two helper functions was provided by the lectures. We configured the client zu receive the broadcasted UDP packages using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_ 
 
-After that we opened a pipe as FIFO buffer. In the main loop we downloaded the packets , using _int udp_client_recv(unsigned *buffer,int buffer_size )_ from the server and we put them in the FIFO. At the same time a POSIX thread. This accessed to the AXI to Audio devices using _/dev/mem_ and in a loop the thread copy one sample at time (4 byte) from the FIFO to the AXI to Audio registers. Since the audio is mono we copied the same sample in both channel.
+Due to the fact that the network stream is received in 256 byte packages and one audio sample is only 4 byte big, we had to buffer the received data. We followed the provided hints and used a FIFO that is accessed from different threads to solve this problem.
+We created a FIFO with the unnamed pipes Linux implementation. Named pipes would have the advantage that they can be accessed from different processes, but thats not needed here, because the threads are sharing the same memory.
+In the main loop we received the packets from the server using the function _int udp_client_recv(unsigned *buffer,int buffer_size )_  and wrote them in the FIFO. 
+
+At the same time a POSIX thread. This accessed to the AXI to Audio devices using _/dev/mem_ and in a loop the thread copy one sample at time (4 byte) from the FIFO to the AXI to Audio registers. Since the audio is mono we copied the same sample in both channel.
 
 #### Test
 To test it, since it is not present a DHCP client in the ZedBoard, we need to configure the network properly, to simplify it in the laboratory we used the *change_ip_and_mac.sh* script, it is present in the same repository of the *updclient.h* library. Finally we can run the driver.
@@ -95,7 +99,7 @@ For the design part on vivado environment , we already have been supplied the Au
 After completing that part , we added the audio mixer driver into the design then connected the Axi to Audio Ips outputs as input to the audio mixer driver.The rest of the design has been kept same as the previous step and audio mixer output connected to the Audio Ip output.
 
 ### Step 4: Adding Filters and Volume Control
-The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [2][lab exercises 4]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line.
+The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line.
 
 *Add description of the User Interface here
 
@@ -105,6 +109,9 @@ The final step of the project was to add a volume control and a filter bank in t
 ## References
 
 [1]: https://github.com/ems-kl/zedboard_audio "Audio IP"
-[2]: https://github.com/tsotnep/ip_repo_vivado "Filter IP and Volume Control IP"
+[2]: https://github.com/karljans/SoC_Design "Mixer IP and UDP Library"
+[3]: http://man7.org/linux/man-pages/man2/pipe.2.html "Unnamed Pipes"
+[4]: http://man7.org/linux/man-pages/man7/pthreads.7.html "POSIX Threads"
+[5]: https://github.com/tsotnep/ip_repo_vivado "Filter IP and Volume Control IP"
 
 
