@@ -69,10 +69,9 @@ This Linux driver's task is just to copy data from the input to output. The firs
 To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupt, and we used '/dev/mem' for the AXI to Audio because in this case , interrupt is not required. After mapping the device, we repeated in a loop these instructions: we enabled the interrupt for the Audio To AXI, we waited the interrupt then  we copied the content of the Audio To Axi registers to the AXI to Audio registers. In this way we transferred  the audio from the line in to the headphone out ports of the ZedBoard.
 
 ### Step 2: Receive Audio Over Network in Linux and Play it Back
-In this step of the project , we wrote a new audio driver which will have capable of getting audio over network. 
+In this step of the project, we wrote a new audio driver which is capable of receiving audio packages from the local network and forward them to the AXI bus. 
 
-The requirements are:
-
+The audio network stream is specified as followed:
 * **Network protocol:** UDP
 * **Sender address:** Broadcast (10.255.255.255)
 * **Port:** 7891
@@ -81,9 +80,9 @@ The requirements are:
 * **Audio channels:** 1, Mono (copy one stream to both left and right channels)
 * **Audio sample format:** PCM, 4 byte samples, can be directly written to the audio IP-s input
 
-We opened the an UDP connection using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_ [presents int this repository](https://github.com/karljans/SoC_Design)
+To simplify this task a library file with two helper functions was provided by the lectures.[presents int this repository](https://github.com/karljans/SoC_Design) We configured the client zu receive the broadcasted UDP packages using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_ 
 
-After that, we opened a pipe as FIFO buffer. In the main loop we downloaded the packets , using _int udp_client_recv(unsigned *buffer,int buffer_size )_ from the server and we put them in the FIFO. At the same time a POSIX thread. This accessed to the AXI to Audio devices using _/dev/mem_ and in a loop the thread copy one sample at time (4 byte) from the FIFO to the AXI to Audio registers. Since the audio is mono we copied the same sample in both channel.
+After that we opened a pipe as FIFO buffer. In the main loop we downloaded the packets , using _int udp_client_recv(unsigned *buffer,int buffer_size )_ from the server and we put them in the FIFO. At the same time a POSIX thread. This accessed to the AXI to Audio devices using _/dev/mem_ and in a loop the thread copy one sample at time (4 byte) from the FIFO to the AXI to Audio registers. Since the audio is mono we copied the same sample in both channel.
 
 #### Test
 To test it, since it is not present a DHCP client in the ZedBoard, we need to configure the network properly, to simplify it in the laboratory we used the *change_ip_and_mac.sh* script, it is present in the same repository of the *updclient.h* library. Finally we can run the driver.
@@ -96,7 +95,7 @@ For the design part on vivado environment , we already have been supplied the Au
 After completing that part , we added the audio mixer driver into the design then connected the Axi to Audio Ips outputs as input to the audio mixer driver.The rest of the design has been kept same as the previous step and audio mixer output connected to the Audio Ip output.
 
 ### Step 4: Adding Filters and Volume Control
-The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former lab exercises 4 [2]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line.
+The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [2][lab exercises 4]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line.
 
 *Add description of the User Interface here
 
