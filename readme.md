@@ -96,11 +96,16 @@ For the design part on vivado environment , we already have been supplied the Au
 After completing that part , we added the audio mixer driver into the design then connected the Axi to Audio Ips outputs as input to the audio mixer driver.The rest of the design has been kept same as the previous step and audio mixer output connected to the Audio Ip output.
 
 ### Step 4: Adding Filters and Volume Control
+The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former lab exercises 4 [2]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line.
+
+*Add description of the User Interface here
+
 
 ## Conclusion
 
 ## References
 
 [1]: https://github.com/ems-kl/zedboard_audio "Audio IP"
+[2]: https://github.com/tsotnep/ip_repo_vivado "Filter IP and Volume Control IP"
 
 
