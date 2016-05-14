@@ -86,6 +86,9 @@ We opened the an UDP connection using the function _int udp_client_setup(char *b
 
 After that, we opened a pipe as FIFO buffer. In the main loop we downloaded the packets , using _int udp_client_recv(unsigned *buffer,int buffer_size )_ from the server and we put them in the FIFO. At the same time a POSIX thread. This accessed to the AXI to Audio devices using _/dev/mem_ and in a loop the thread copy one sample at time (4 byte) from the FIFO to the AXI to Audio registers. Since the audio is mono we copied the same sample in both channel.
 
+#### Test
+To test it, since it is not present a DHCP client in the ZedBoard, we need to configure the network properly, to simplify it in the laboratory we used the *change_ip_and_mac.sh* script, it is present in the same repository of the *updclient.h* library. Finally we can run the driver.
+
 ### Step 3: Mixing the Two Streams, Multi-Threading
 In this step of the project , we added a new IP which has task mixing two different streams and transfer it to the Audio Ip out which is the final Ip before the audio released to headphone.
 In previous steps ,we have already achieved to get streams over line in and network channels seperately.For the first step we had copy driver works with the thread , named copy thread and for the second step we have defined receive thread which is supposed to handle stream coming over the network.
