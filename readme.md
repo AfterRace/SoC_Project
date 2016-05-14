@@ -76,7 +76,8 @@ The script help change the MAC and IP address.
 
 ### Step 3: Mixing the Two Streams, Multi-Threading
 In this step of the project , we added a new IP which has task mixing two different streams and transfer it to the Audio Ip out which is the final Ip before the audio released to headphone.
-In previous steps ,we have already achieved to get streams over line in and network channels seperately.For the first step we had copy driver works with the thread , named copy thread and for the second step we have defined receive thread which is supposed to handle stream coming over the network.Basically we merged our previous two drivers copy driver and receive driver and modified the code and created our audio mixer driver.
+In previous steps ,we have already achieved to get streams over line in and network channels seperately.For the first step we had copy driver works with the thread , named copy thread and for the second step we have defined receive thread which is supposed to handle stream coming over the network.
+Basically we merged our previous two drivers copy driver and receive driver and modified the code and created our audio mixer driver.
 For the design part on vivado environment , we already have been supplied the Audio Mixer IP.Before adding Audio Mixer Ip into the design first we doubled up the Axi to Audio Ip so we could  manage to get both streams over audio driver.
 After completing that part , we added the audio mixer driver into the design then connected the Axi to Audio Ips outputs as input to the audio mixer driver.The rest of the design has been kept same as the previous step and audio mixer output connected to the Audio Ip output.
 
