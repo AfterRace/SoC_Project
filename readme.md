@@ -101,7 +101,108 @@ After completing that part , we added the audio mixer driver into the design the
 ### Step 4: Adding Filters and Volume Control
 The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line.
 
-*Add description of the User Interface here
+#### How to use it
+
+First we need to connect an audio source to the line in, the Ethernet cable to the Ethernet port and the headphones to the headphones out.
+
+Load the kernel module *uio_pdrv_genirq.ko*
+
+`zynq> insmod uio_pdrv_genirq.ko`
+
+Run the driver
+
+```lang-none
+zynq> ./final_mixer_driver
+
+Welcome to the Audio MIXER driver
+Initialization started...
+Initialization finished...
+
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> _  		
+```
+
+Now we can heard both sources in the headphone, if we want to listen only the line in source we need to disable, the network channel. We can do it in two ways: set 0 the volume of the channel or turn off the all the filters. 
+For example we disable the volume of the network channel. First we have to select the channel 0
+
+```lang-none
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> 0
+
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> _ 		
+```
+
+We choose the `V` option and set `0` the volume value 
+
+```lang-none
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> V
+
+Enter the value for the volume [0 - 4096]> 0
+```
+
+Now we can hear only the line in channel. If we want to play with the sound we can enable or disable the low, band, high pass filters of the channel. If for example we want to listen only the low frequencies of the audio, we need to select the `1` channel and select the `F` setting
+
+```lang-none
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> 1
+
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> F
+
+Enter the filter value [LBH]> _ 	
+```
+
+Now we have to insert a sequence of three 1 or 0. 1 is for enable the filter, 0 for disable it. The first digit is relative to the low pass filter, the second one is relative to the band pass filter, the third one is relative to the high pass filter. So if we want to enable only the low pass filter we need to pass the `100` to the prompt.
+
+```lang-none
+Enter the filter value [LBH]> 100 	
+```
+
+If we want to list the configuration of the channel `0` we need to use the `L` setting
+
+```lang-none
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> 0
+
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> L
+
+List of setting of network channel:
+Volume LEFT: 0
+Volume RIGHT: 0
+Low Pass Filter: ON
+Band Pass Filter: ON
+High Pass Filter: OFF"
+
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> 0
+```
+
+#### How to enable the Debug mode 
 
 
 ## Conclusion
