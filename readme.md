@@ -80,15 +80,16 @@ The audio network stream is specified as followed:
 * **Audio channels:** 1, Mono (copy one stream to both left and right channels)
 * **Audio sample format:** PCM, 4 byte samples, can be directly written to the audio IP-s input
 
-To simplify this task a [library file][3] with two helper functions was provided by the lectures. We configured the client zu receive the broadcasted UDP packages using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_ 
+To simplify this task a [library file][3] with two helper functions was provided by the lectures. We configured the client tu receive the broadcasted UDP packages using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_.
 
-Due to the fact that the network stream is received in 256 byte packages and one audio sample is only 4 byte big, we had to buffer the received data. We followed the provided hints and used a FIFO that is accessed from different threads to solve this problem.
-We created a FIFO with the unnamed pipes Linux implementation. Named pipes would have the advantage that they can be accessed from different processes, but thats not needed here, because the threads are sharing the same memory.
-In the main loop we received the packets from the server using the function _int udp_client_recv(unsigned *buffer,int buffer_size )_  and wrote them in the FIFO. 
+Due to the fact that the network stream is received in 256 byte packages and one audio sample is only 4 byte big, we had to buffer the received data. We followed the provided hints and used a FIFO that is accessed from different threads to solve this problem.We created a FIFO with the [unnamed pipes][4] Linux implementation. Named pipes would have the advantage that they can be accessed from different processes, but thats not needed here, because the threads are sharing the same memory.
+In the main loop we received the packets from the server using the function _int udp_client_recv(unsigned *buffer,int buffer_size )_  and wrote them in the FIFO.
 
-At the same time a POSIX thread. This accessed to the AXI to Audio devices using _/dev/mem_ and in a loop the thread copy one sample at time (4 byte) from the FIFO to the AXI to Audio registers. Since the audio is mono we copied the same sample in both channel.
+To read the data from the FIFO we used a [POSIX thread][5]. The thread copies one sample a time (4 byte) from the FIFO to the AXI-to-Audio registers that are accessed via the /dev/mem/ interface. Since the audio stream is mono we copied the same sample to both channels. If the FIFO is empty the thread is waiting until new data is available.
+
 
 #### Test
+To test it we have to configure the 
 To test it, since it is not present a DHCP client in the ZedBoard, we need to configure the network properly, to simplify it in the laboratory we used the *change_ip_and_mac.sh* script, it is present in the same repository of the *updclient.h* library. Finally we can run the driver.
 
 ### Step 3: Mixing the Two Streams, Multi-Threading
