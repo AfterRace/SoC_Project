@@ -70,9 +70,21 @@ This Linux driver's task is just to copy data from the input to output. The firs
 To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupt, and we used '/dev/mem' for the AXI to Audio because in this case , interrupt is not required. After mapping the device, we repeated in a loop these instructions: we enabled the interrupt for the Audio To AXI, we waited the interrupt then  we copied the content of the Audio To Axi registers to the AXI to Audio registers. In this way we transferred  the audio from the line in to the headphone out ports of the ZedBoard.
 
 ### Step 2: Receive Audio Over Network in Linux and Play it Back
-In this step of the project ,we wrote  a new audio driver which will have capable of getting audio over network.When we are creating this driver and component design , because of audio broadcast is using UDP protocol we created our driver accordingly.For networking
-to work properly there was a script supplied by lab assistants.
-The script help change the MAC and IP address.
+In this step of the project , we wrote a new audio driver which will have capable of getting audio over network. 
+
+The requirements are:
+
+* **Network protocol:** UDP
+* **Sender address:** Broadcast (10.255.255.255)
+* **Port:** 7891
+* **Packet size:** 256 bytes
+* **Size of one sample:** 4 bytes
+* **Audio channels:** 1, Mono (copy one stream to both left and right channels)
+* **Audio sample format:** PCM, 4 byte samples, can be directly written to the audio IP-s input
+
+We opened the an UDP connection using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_ [presents int this repository](https://github.com/karljans/SoC_Design)
+
+After that, we opened a pipe as FIFO buffer. In the main loop we downloaded the packets , using _int udp_client_recv(unsigned *buffer,int buffer_size )_ from the server and we put them in the FIFO. At the same time a POSIX thread. This accessed to the AXI to Audio devices using _/dev/mem_ and in a loop the thread copy one sample at time (4 byte) from the FIFO to the AXI to Audio registers. Since the audio is mono we copied the same sample in both channel.
 
 ### Step 3: Mixing the Two Streams, Multi-Threading
 In this step of the project , we added a new IP which has task mixing two different streams and transfer it to the Audio Ip out which is the final Ip before the audio released to headphone.
