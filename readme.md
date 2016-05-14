@@ -5,20 +5,19 @@ This repository stores our solution of the audio mixer project, that was part of
 Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
 
 ## Table of Contents
-
- - Introduction
- - Getting Started
- - Documentation
-	 - Step 1: Audio Loop-Back Through Linux
-	 - Step 2: Receive Audio Over Network in Linux and Play it Back
-	 - Step 3: Mixing the Two Streams, Multi-Threading
-	 - Step 4: Adding Filters and Volume Control
- - Conclusion
- - References
+ - [Introduction](#introduction)
+ - [Getting Started](#getting-started)
+ - [Documentation](#documentation)
+	 - [Step 1: Audio Loop-Back Through Linux](#step-1-audio-loop-back-through-linux)
+	 - [Step 2: Receive Audio Over Network in Linux and Play it Back](#step-2-receive-audio-over-network-in-linux-and-play-it)
+	 - [Step 3: Mixing the Two Streams, Multi-Threading](#step-3-mixing-the-two-streams-multi-threading)
+	 - [Step 4: Adding Filters and Volume Control](#step-4-adding-filters-and-volume-control)
+ - [Conclusion](#conclusion)
+ - [References](#references)
 
 ## Introduction
-The purpose of this project is to build a audio mixer on the Zedboard running Linux. The Zedboard is built up on the Xilinx Zynq platform that combines an ARM CPU with a FPGA on one Chip. Therefore we had to develop a custom hardware design for the FPGA and write the software to control it from Linux. 
-
+The purpose of this project is to build a audio mixer on the Zedboard running Linux. The Zedboard is built up on the Xilinx Zynq platform that combines an ARM CPU with a FPGA on one Chip. Therefore we had to develop a custom hardware design for the FPGA and write the software to control it from Linux. As shown in the following picture, one input stream is received from the network and one from the local line-in port. The signal path of each channel contains a volume control and a filter IP core. Their settings can be controlled from a linux command line interface to modifiy the contribution of each input to the mixed stream. The output stream is available at the headphone jack of the zedboard.
+![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/introduction.png)
 
 ## Getting Started
 
