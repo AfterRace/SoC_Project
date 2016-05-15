@@ -7,6 +7,7 @@ Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
 ## Table of Contents
  - [Introduction](#introduction)
  - [Getting Started](#getting-started)
+ - [Team Organisation](#team-organisation)
  - [Documentation](#documentation)
 	 - [Step 1: Audio Loop-Back Through Linux](#step-1-audio-loop-back-through-linux)
 	 - [Step 2: Receive Audio Over Network in Linux and Play it Back](#step-2-receive-audio-over-network-in-linux-and-play-it-back)
@@ -52,18 +53,28 @@ Copy all files of the bin/ folder to the SD card. To start the driver on the Zed
     insmod uio_pdrv_genirq.ko
     ./final_mixer_driver
 
+##Team Organisation
+- Martin Grabmann
+	- Team leader, IP core design, programming
+- Eyyup Direk
+	- IP based hardware design, code review and test 	
+- Mezzogori Massimo
+	- Programming, code review and test
 
 ## Documentation
 ### Step 1: Audio Loop-Back Through Linux
-In previous labs , we have implemented something similar to this step but  we didnt use the linux driver in those implementation.
-In this step We  wrote two IPs in VHDL : Audio To Axi and Axi To Audio components that we used in our design. Also, we implemented the Audio Copy Driver in such a way which will take the input from Audio to Axi component and will return output to Axi to Audio component.
+In previous labs, we have implemented something similar to this step but  we didnt use the linux driver in those implementation.
+In this step We  wrote two IPs in VHDL: Audio To Axi and Axi To Audio components that we used in our design. Also, we implemented the Audio Copy Driver in such a way which will take the input from Audio to Axi component and will return output to Axi to Audio component.
 The audio analog signal is taken by the board through the [Audio IP][1] given by the lecturer. This IP is an interface for connecting the ADAU1761 audio codecs.
 Overall We connected this components with each other to be able to obtain a simple auido loop-back through linux.
 
 #### Audio To Axi
 We created this custom intellectual property our own selves.After creation process in vivado environment ,We created vhdl file for this specific IP then edited the code such a way which will take audio as an input then provide output to on AXI bus.Basically  by creating this Ip ,we intended to convert audio which comes from Audio IP into information on AXI bus.
+![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/audio-to-AXI.png)
 #### Axi To Audio
 Same as in Audio to Axi we created this custom ip our own selves.We created vhdl description and defined inputs and outputs of our entity which will be completely compatible with the Audio copy driver output.After audio driver copied data from input to output ,This Ip takes the process in Audio to Axi backward and information is converted to audio which we can listen by our headphones.
+
+![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/AXI-to-audio.png)
 #### Audio Copy Driver
 This Linux driver's task is just to copy data from the input to output. The first thing that we did it was to access the devices that we created before.
 To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupt, and we used '/dev/mem' for the AXI to Audio because in this case , interrupt is not required. After mapping the device, we repeated in a loop these instructions: we enabled the interrupt for the Audio To AXI, we waited the interrupt then  we copied the content of the Audio To Axi registers to the AXI to Audio registers. In this way we transferred  the audio from the line in to the headphone out ports of the ZedBoard.
