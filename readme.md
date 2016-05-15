@@ -146,6 +146,7 @@ In the first step we created the two IP cores Audio to Axi and Axi to Audio that
 
 #### Audio To Axi
 We created this custom intellectual property by our own. Therefore we used the Create IP wizard in Vivado to create a new AXI Lite peripheral. We added the input ports for the audio interface to the generated VHDL wrapper and connected them to the AXI bus registers. In addtion we added an interrupt line to the core to signal the processing system that a new sample is available.
+
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/audio-to-AXI.png)
 #### Axi To Audio
 As for the Audio to Axi we created this custom IP by our own. This IP core takes the samples from the AXI bus and provides them to the other audio IP cores. We created an AXI Lite peripheral and added to the VHDL description inputs and outputs of our entity to make it compatible with the other audio components. 
@@ -211,4 +212,8 @@ Threads:
 [4]: http://man7.org/linux/man-pages/man7/pthreads.7.html "POSIX Threads"
 [5]: https://github.com/tsotnep/ip_repo_vivado "Filter IP and Volume Control IP"
 
-
+\[1\]: https://github.com/ems-kl/zedboard_audio "Audio IP"
+\[2\]: https://github.com/karljans/SoC_Design "Mixer IP and UDP Library"
+\[3\]: http://man7.org/linux/man-pages/man2/pipe.2.html "Unnamed Pipes"
+\[4\]: http://man7.org/linux/man-pages/man7/pthreads.7.html "POSIX Threads"
+\[5\]: https://github.com/tsotnep/ip_repo_vivado "Filter IP and Volume Control IP"
