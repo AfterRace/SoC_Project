@@ -142,16 +142,13 @@ Select the channel to change
 
 ## Documentation
 ### Step 1: Audio Loop-Back Through Linux
-In previous labs, we have implemented something similar to this step but  we didnt use the linux driver in those implementation.
-In this step We  wrote two IPs in VHDL: Audio To Axi and Axi To Audio components that we used in our design. Also, we implemented the Audio Copy Driver in such a way which will take the input from Audio to Axi component and will return output to Axi to Audio component.
-The audio analog signal is taken by the board through the [Audio IP][1] given by the lecturer. This IP is an interface for connecting the ADAU1761 audio codecs.
-Overall We connected this components with each other to be able to obtain a simple auido loop-back through linux.
+In the first step we created the two IP cores Audio to Axi and Axi to Audio that we used in our design. In additon we implemented an Audio Copy Driver that reads audio samples from the Audio to Axi core and writes them back to the Axi to Audio core. The analog audio signal is taken by the board through the [Audio IP][1] given by the lecturer. This IP is an interface for connecting the ADAU1761 audio codec. We connected this component with the AXI components to be able to obtain a simple audio loop-back through linux.
 
 #### Audio To Axi
-We created this custom intellectual property our own selves.After creation process in vivado environment ,We created vhdl file for this specific IP then edited the code such a way which will take audio as an input then provide output to on AXI bus.Basically  by creating this Ip ,we intended to convert audio which comes from Audio IP into information on AXI bus.
+We created this custom intellectual property by our own. Therefore we used the Create IP wizard in Vivado to create a new AXI Lite peripheral. We added the input ports for the audio interface to the generated VHDL wrapper and connected them to the AXI bus registers. In addtion we added an interrupt line to the core to signal the processing system that a new sample is available.
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/audio-to-AXI.png)
 #### Axi To Audio
-Same as in Audio to Axi we created this custom ip our own selves.We created vhdl description and defined inputs and outputs of our entity which will be completely compatible with the Audio copy driver output.After audio driver copied data from input to output ,This Ip takes the process in Audio to Axi backward and information is converted to audio which we can listen by our headphones.
+As for the Audio to Axi we created this custom IP by our own. We created vhdl description and defined inputs and outputs of our entity which will be completely compatible with the Audio copy driver output.After audio driver copied data from input to output ,This Ip takes the process in Audio to Axi backward and information is converted to audio which we can listen by our headphones.
 
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/AXI-to-audio.png)
 #### Audio Copy Driver
