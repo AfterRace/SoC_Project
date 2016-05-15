@@ -76,22 +76,13 @@ Select the channel to change
 ```
 
 Now we can hear the mixed stream on the headphone. If we want to listen only to the line in source, we have to disable the network channel. We can do it in two ways: set the volume of the channel to 0 or turn off all the filters. 
-As an example we disable the volume of the network channel. First we select the channel 0.
+As an example we disable the volume of the network channel. First we select the channel 0. We choose the `V` option and set the volume value to `0` 
 ```lang-none
 Select the channel to change
 0 : for network channel
 1 : for line in channel 
 > 0
 
-Select the setting to change:
-V : for volume control
-F : for filter control 
-L : for list of current settings
-> _ 		
-```
-
-We choose the `V` option and set the volume value to `0` 
-```lang-none
 Select the setting to change:
 V : for volume control
 F : for filter control 
@@ -113,8 +104,6 @@ V : for volume control
 F : for filter control 
 L : for list of current settings
 > F
-
-Enter the filter value [LBH]> _ 	
 ```
 
 Now we have to insert a bitmask of three 1 or 0. A 1 represents an enabled filter and 0 a disabled one. The first digit is related to the low pass filter, the second one to the band pass filter and the third one to the high pass filter. If we want to enable only the low pass filter we need to pass `100` to the prompt.
@@ -122,13 +111,8 @@ Now we have to insert a bitmask of three 1 or 0. A 1 represents an enabled filte
 Enter the filter value [LBH]> 100 	
 ```
 
-If we want to list the configuration of the channel `0` we can use the `L` command.
+If we want to list the configuration of a channel we can use the `L` command.
 ```lang-none
-Select the channel to change
-0 : for network channel
-1 : for line in channel 
-> 0
-
 Select the setting to change:
 V : for volume control
 F : for filter control 
