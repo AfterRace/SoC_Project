@@ -148,12 +148,15 @@ In the first step we created the two IP cores Audio to Axi and Axi to Audio that
 We created this custom intellectual property by our own. Therefore we used the Create IP wizard in Vivado to create a new AXI Lite peripheral. We added the input ports for the audio interface to the generated VHDL wrapper and connected them to the AXI bus registers. In addtion we added an interrupt line to the core to signal the processing system that a new sample is available.
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/audio-to-AXI.png)
 #### Axi To Audio
-As for the Audio to Axi we created this custom IP by our own. We created vhdl description and defined inputs and outputs of our entity which will be completely compatible with the Audio copy driver output.After audio driver copied data from input to output ,This Ip takes the process in Audio to Axi backward and information is converted to audio which we can listen by our headphones.
+As for the Audio to Axi we created this custom IP by our own. This IP core takes the samples from the AXI bus and provides them to the other audio IP cores. We created an AXI Lite peripheral and added to the VHDL description inputs and outputs of our entity to make it compatible with the other audio components. 
 
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/AXI-to-audio.png)
 #### Audio Copy Driver
-This Linux driver's task is just to copy data from the input to output. The first thing that we did it was to access the devices that we created before.
-To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupt, and we used '/dev/mem' for the AXI to Audio because in this case , interrupt is not required. After mapping the device, we repeated in a loop these instructions: we enabled the interrupt for the Audio To AXI, we waited the interrupt then  we copied the content of the Audio To Axi registers to the AXI to Audio registers. In this way we transferred  the audio from the line in to the headphone out ports of the ZedBoard.
+This Linux driver is just copying data from the Audio to Axi to the Axi to Audio device. The first thing that we did it was to access the devices that we created before.
+To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupts and we used '/dev/mem' for the AXI to Audio because in this case interrupt handling is not required. After opening and mapping the memory, we repeated in a loop the following instructions: enable the interrupt for the Audio To AXI device, wait for the interrupt,  copy the content of the Audio To Axi registers to the AXI to Audio registers. 
+
+In this way we transferred the audio from the line in to the headphone out ports of the ZedBoard.
+For debugging puproses we added initially output messages to the while loop. Since the printf() function takes a lot of time, the timing requirements of the 48kHz audio stream could not be met and the output stream sounded terrible. We had to remove them finally. 
 
 ### Step 2: Receive Audio Over Network in Linux and Play it Back
 In this step of the project, we wrote a new audio driver which is capable of receiving audio packages from the local network and forward them to the AXI bus. 
@@ -185,7 +188,17 @@ For the design part on vivado environment , we already have been supplied the Au
 After completing that part , we added the audio mixer driver into the design then connected the Axi to Audio Ips outputs as input to the audio mixer driver.The rest of the design has been kept same as the previous step and audio mixer output connected to the Audio Ip output.
 
 ### Step 4: Adding Filters and Volume Control
-The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop.
+The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop. The user interface is designed very simple. We are just using the functions getchar() and scanf() to read the user input and control the flow throug varios conditional statements. The functionality of the user interface is explained in the [How to use it](#how-to-use-it) section.  
+
+Threads:
+- fifo_write_thread
+	- receives network packages and write them to the FIFO	
+- fifo_read_thread
+	- reads samples from the FIFO and writes them to AXI to Audio channel 0	
+- copy_thread
+	- reads samples from Audio to AXI device and writes them to AXI to Audio channel 1
+- main
+	- user interface 
 
 
 ## Conclusion
