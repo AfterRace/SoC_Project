@@ -191,7 +191,7 @@ After completing that part , we added the audio mixer driver into the design the
 ### Step 4: Adding Filters and Volume Control
 The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop. The user interface is designed very simple. We are just using the functions getchar() and scanf() to read the user input and control the flow throug varios conditional statements. The functionality of the user interface is explained in the [How to use it](#how-to-use-it) section.  
 
-Threads:
+The tasks are spread between the threads as follows:
 - fifo_write_thread
 	- receives network packages and write them to the FIFO	
 - fifo_read_thread
@@ -203,6 +203,7 @@ Threads:
 
 
 ## Conclusion
+We successfly solved the tasks in the given time frame. All requirements are fullfiled and tested. We faced no serious problems during the implementation.
 
 ## References
 
@@ -213,7 +214,11 @@ Threads:
 [5]: https://github.com/tsotnep/ip_repo_vivado "Filter IP and Volume Control IP"
 
 \[1\]: https://github.com/ems-kl/zedboard_audio "Audio IP"
+
 \[2\]: https://github.com/karljans/SoC_Design "Mixer IP and UDP Library"
+
 \[3\]: http://man7.org/linux/man-pages/man2/pipe.2.html "Unnamed Pipes"
+
 \[4\]: http://man7.org/linux/man-pages/man7/pthreads.7.html "POSIX Threads"
+
 \[5\]: https://github.com/tsotnep/ip_repo_vivado "Filter IP and Volume Control IP"
