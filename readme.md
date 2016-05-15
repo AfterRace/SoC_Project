@@ -7,6 +7,9 @@ Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
 ## Table of Contents
  - [Introduction](#introduction)
  - [Getting Started](#getting-started)
+ 	- [Hardware Project](#hardware-project)
+ 	- [Linux driver](#Linux-driver)
+ 	- [How to use it](#how-to-use-it)
  - [Team Organisation](#team-organisation)
  - [Documentation](#documentation)
 	 - [Step 1: Audio Loop-Back Through Linux](#step-1-audio-loop-back-through-linux)
@@ -22,7 +25,7 @@ The purpose of this project is to build a audio mixer on the Zedboard running Li
 
 ## Getting Started
 
-### Hardware project
+### Hardware Project
 We used Xilinx Vivado 2015.1 for the hardware design. 
  - vivado/
 	 - project/         
@@ -35,7 +38,7 @@ We used Xilinx Vivado 2015.1 for the hardware design.
 	 
 Copy all files of the sd-image/ folder to the SD card.
 	
-### Linux driver
+### Linux Driver
 
  - bin/
 	 - Contains the binaries
@@ -46,12 +49,104 @@ Copy all files of the sd-image/ folder to the SD card.
  - drivers/
 	 - Contains the sources
 
-Copy all files of the bin/ folder to the SD card. To start the driver on the Zedboard type:
+Copy all files of the bin/ folder to the SD card. 
+    
+#### How to use it
+
+First we need to connect an audio source to the line in, the Ethernet cable to the Ethernet port and the headphones to the headphones out.
+To start the driver on the Zedboard type:
 
     mount /dev/mmcblk0p1 /mnt
     cd /mnt
+    ./change_ip_and_mac.sh \[PC Number\]
     insmod uio_pdrv_genirq.ko
     ./final_mixer_driver
+
+The started user interface looks as follows:
+
+```lang-none
+Welcome to the Audio MIXER driver
+Initialization started...
+Initialization finished...
+
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> _  		
+```
+
+Now we can hear the mixed stream on the headphone. If we want to listen only to the line in source, we have to disable the network channel. We can do it in two ways: set the volume of the channel to 0 or turn off all the filters. 
+As an example we disable the volume of the network channel. First we select the channel 0.
+```lang-none
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> 0
+
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> _ 		
+```
+
+We choose the `V` option and set the volume value to `0` 
+```lang-none
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> V
+
+Enter the value for the volume [0 - 4096]> 0
+```
+
+Now we can hear only the line in channel. If we want to play with the sound we can enable or disable the low, band, high pass filters of the channel. For example if we want to hear only the low frequency range of the line in channel, we need to select channel `1` and select the `F` setting.
+```lang-none
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> 1
+
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> F
+
+Enter the filter value [LBH]> _ 	
+```
+
+Now we have to insert a bitmask of three 1 or 0. A 1 represents an enabled filter and 0 a disabled one. The first digit is related to the low pass filter, the second one to the band pass filter and the third one to the high pass filter. If we want to enable only the low pass filter we need to pass `100` to the prompt.
+```lang-none
+Enter the filter value [LBH]> 100 	
+```
+
+If we want to list the configuration of the channel `0` we can use the `L` command.
+```lang-none
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> 0
+
+Select the setting to change:
+V : for volume control
+F : for filter control 
+L : for list of current settings
+> L
+
+List of setting of network channel:
+Volume LEFT: 0
+Volume RIGHT: 0
+Low Pass Filter: ON
+Band Pass Filter: ON
+High Pass Filter: OFF"
+
+Select the channel to change
+0 : for network channel
+1 : for line in channel 
+> _
+```
 
 ##Team Organisation
 - Martin Grabmann
@@ -99,9 +194,7 @@ To read the data from the FIFO we used a [POSIX thread][5]. The thread copies on
 
 During the implementation of this step we faced some problems with the writing and reading from the FIFO. The FIFO expects char pointers (1 Byte) as parameters but the audio samples are 4 Byte big. The problems could be solved with the right casting of the pointers.
 
-#### Test
-To test it we have to configure the 
-To test it, since it is not present a DHCP client in the ZedBoard, we need to configure the network properly, to simplify it in the laboratory we used the *change_ip_and_mac.sh* script, it is present in the same repository of the *updclient.h* library. Finally we can run the driver.
+To test it, we need to configure the network interface of the zedboard properly. To simplify this we used the provided *change_ip_and_mac.sh* script, which is present in the same repository like the *updclient.h* library.
 
 ### Step 3: Mixing the Two Streams, Multi-Threading
 In this step of the project , we added a new IP which has task mixing two different streams and transfer it to the Audio Ip out which is the final Ip before the audio released to headphone.
@@ -112,109 +205,6 @@ After completing that part , we added the audio mixer driver into the design the
 
 ### Step 4: Adding Filters and Volume Control
 The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop.
-
-#### How to use it
-
-First we need to connect an audio source to the line in, the Ethernet cable to the Ethernet port and the headphones to the headphones out.
-
-Load the kernel module *uio_pdrv_genirq.ko*
-
-`zynq> insmod uio_pdrv_genirq.ko`
-
-Run the driver
-
-```lang-none
-zynq> ./final_mixer_driver
-
-Welcome to the Audio MIXER driver
-Initialization started...
-Initialization finished...
-
-Select the channel to change
-0 : for network channel
-1 : for line in channel 
-> _  		
-```
-
-Now we can heard both sources in the headphone, if we want to listen only the line in source we need to disable, the network channel. We can do it in two ways: set 0 the volume of the channel or turn off the all the filters. 
-For example we disable the volume of the network channel. First we have to select the channel 0
-
-```lang-none
-Select the channel to change
-0 : for network channel
-1 : for line in channel 
-> 0
-
-Select the setting to change:
-V : for volume control
-F : for filter control 
-L : for list of current settings
-> _ 		
-```
-
-We choose the `V` option and set `0` the volume value 
-
-```lang-none
-Select the setting to change:
-V : for volume control
-F : for filter control 
-L : for list of current settings
-> V
-
-Enter the value for the volume [0 - 4096]> 0
-```
-
-Now we can hear only the line in channel. If we want to play with the sound we can enable or disable the low, band, high pass filters of the channel. If for example we want to listen only the low frequencies of the audio, we need to select the `1` channel and select the `F` setting
-
-```lang-none
-Select the channel to change
-0 : for network channel
-1 : for line in channel 
-> 1
-
-Select the setting to change:
-V : for volume control
-F : for filter control 
-L : for list of current settings
-> F
-
-Enter the filter value [LBH]> _ 	
-```
-
-Now we have to insert a sequence of three 1 or 0. 1 is for enable the filter, 0 for disable it. The first digit is relative to the low pass filter, the second one is relative to the band pass filter, the third one is relative to the high pass filter. So if we want to enable only the low pass filter we need to pass the `100` to the prompt.
-
-```lang-none
-Enter the filter value [LBH]> 100 	
-```
-
-If we want to list the configuration of the channel `0` we need to use the `L` setting
-
-```lang-none
-Select the channel to change
-0 : for network channel
-1 : for line in channel 
-> 0
-
-Select the setting to change:
-V : for volume control
-F : for filter control 
-L : for list of current settings
-> L
-
-List of setting of network channel:
-Volume LEFT: 0
-Volume RIGHT: 0
-Low Pass Filter: ON
-Band Pass Filter: ON
-High Pass Filter: OFF"
-
-Select the channel to change
-0 : for network channel
-1 : for line in channel 
-> _
-```
-
-#### How to enable the Debug mode 
 
 
 ## Conclusion
