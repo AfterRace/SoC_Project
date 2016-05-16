@@ -8,7 +8,7 @@ Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
  - [Introduction](#introduction)
  - [Getting Started](#getting-started)
  	- [Hardware Project](#hardware-project)
- 	- [Linux driver](#Linux-driver)
+ 	- [Linux driver](#linux-driver)
  	- [How to use it](#how-to-use-it)
  - [Team Organisation](#team-organisation)
  - [Documentation](#documentation)
@@ -20,13 +20,14 @@ Authors: Grabmann Martin, Eyyup Direk, Mezzogori Massimo
  - [References](#references)
 
 ## Introduction
-The purpose of this project is to build a audio mixer on the Zedboard running Linux. The Zedboard is built up on the Xilinx Zynq platform that combines an ARM CPU with a FPGA on one Chip. Therefore we had to develop a custom hardware design for the FPGA and write the software to control it from Linux. As shown in the following picture, one input stream is received from the network and one from the local line-in port. The signal path of each channel contains a volume control and a filter IP core. Their settings can be controlled from a linux command line interface to modifiy the contribution of each input to the mixed stream. The output stream is available at the headphone jack of the zedboard.
+The purpose of this project is to build a audio mixer on the Zedboard running Linux. The Zedboard is built up on the Xilinx Zynq platform that combines an ARM CPU with a FPGA on one Chip. Therefore we had to develop a custom hardware design for the FPGA and write the software to control it from Linux. As shown in the following picture, one input stream is received from the network and one from the local line-in port. The signal path of each channel contains a volume control and a filter IP core. Their settings can be controlled from a linux command line interface to modifiy the contribution of each input to the mixed stream. The output stream is available at the headphone jack of the Zedboard.
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/introduction.png)
 
 ## Getting Started
 
 ### Hardware Project
 We used Xilinx Vivado 2015.1 for the hardware design. 
+Directory overview:
  - vivado/
 	 - project/         
 		 - Vivado project containing the block design
@@ -39,7 +40,7 @@ We used Xilinx Vivado 2015.1 for the hardware design.
 Copy all files of the sd-image/ folder to the SD card.
 	
 ### Linux Driver
-
+Directory overview:
  - bin/
 	 - Contains the binaries
 	 - final_mixer_driver 
@@ -51,14 +52,14 @@ Copy all files of the sd-image/ folder to the SD card.
 
 Copy all files of the bin/ folder to the SD card. 
     
-#### How to use it
+### How to use it
 
 First we need to connect an audio source to the line in, the Ethernet cable to the Ethernet port and the headphones to the headphones out.
 To start the driver on the Zedboard type:
 
     mount /dev/mmcblk0p1 /mnt
     cd /mnt
-    ./change_ip_and_mac.sh \[PC Number\]
+    ./change_ip_and_mac.sh [PC Number]
     insmod uio_pdrv_genirq.ko
     ./final_mixer_driver
 
@@ -76,7 +77,7 @@ Select the channel to change
 ```
 
 Now we can hear the mixed stream on the headphone. If we want to listen only to the line in source, we have to disable the network channel. We can do it in two ways: set the volume of the channel to 0 or turn off all the filters. 
-As an example we disable the volume of the network channel. First we select the channel 0. We choose the `V` option and set the volume value to `0` 
+As an example we disable the volume of the network channel. First we select the channel 0. We choose the `V` option and set the volume value to `0`.
 ```lang-none
 Select the channel to change
 0 : for network channel
@@ -142,19 +143,19 @@ Select the channel to change
 
 ## Documentation
 ### Step 1: Audio Loop-Back Through Linux
-In the first step we created the two IP cores Audio to Axi and Axi to Audio that we used in our design. In additon we implemented an Audio Copy Driver that reads audio samples from the Audio to Axi core and writes them back to the Axi to Audio core. The analog audio signal is taken by the board through the [Audio IP][1] given by the lecturer. This IP is an interface for connecting the ADAU1761 audio codec. We connected this component with the AXI components to be able to obtain a simple audio loop-back through linux.
+In the first step we created the two IP cores Audio to AXI and AXI to Audio that we used in our design. In additon we implemented an Audio Copy Driver that reads audio samples from the Audio to AXI core and writes them back to the AXI to Audio core. The analog audio signal is taken by the board through the [Audio IP][1] given by the lecturer. This IP is an interface for connecting the ADAU1761 audio codec. We connected this component with the AXI components to be able to obtain a simple audio loop-back through linux.
 
-#### Audio To Axi
+#### Audio To AXI
 We created this custom intellectual property by our own. Therefore we used the Create IP wizard in Vivado to create a new AXI Lite peripheral. We added the input ports for the audio interface to the generated VHDL wrapper and connected them to the AXI bus registers. In addtion we added an interrupt line to the core to signal the processing system that a new sample is available.
 
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/audio-to-AXI.png)
-#### Axi To Audio
-As for the Audio to Axi we created this custom IP by our own. This IP core takes the samples from the AXI bus and provides them to the other audio IP cores. We created an AXI Lite peripheral and added to the VHDL description inputs and outputs of our entity to make it compatible with the other audio components. 
+#### AXI To Audio
+As for the Audio to AXI we created this custom IP by our own. This IP core takes the samples from the AXI bus and provides them to the other audio IP cores. We created an AXI Lite peripheral and added to the VHDL description inputs and outputs of our entity to make it compatible with the other audio components. 
 
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/AXI-to-audio.png)
 #### Audio Copy Driver
-This Linux driver is just copying data from the Audio to Axi to the Axi to Audio device. The first thing that we did it was to access the devices that we created before.
-To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupts and we used '/dev/mem' for the AXI to Audio because in this case interrupt handling is not required. After opening and mapping the memory, we repeated in a loop the following instructions: enable the interrupt for the Audio To AXI device, wait for the interrupt,  copy the content of the Audio To Axi registers to the AXI to Audio registers. 
+This Linux driver is just copying data from the Audio to AXI to the AXI to Audio device. The first thing that we did here was to access the devices that we created before.
+To do this we used '/dev/uio0' for the Audio to AXI device because it needs to handle interrupts and we used '/dev/mem' for the AXI to Audio because in this case interrupt handling is not required. After opening and mapping the memory, we repeated in a loop the following instructions: enable the interrupt for the Audio To AXI device, wait for the interrupt,  copy the content of the Audio to AXI registers to the AXI to Audio registers. 
 
 In this way we transferred the audio from the line in to the headphone out ports of the ZedBoard.
 For debugging puproses we added initially output messages to the while loop. Since the printf() function takes a lot of time, the timing requirements of the 48kHz audio stream could not be met and the output stream sounded terrible. We had to remove them finally. 
@@ -171,7 +172,7 @@ The audio network stream is specified as followed:
 * **Audio channels:** 1, Mono (copy one stream to both left and right channels)
 * **Audio sample format:** PCM, 4 byte samples, can be directly written to the audio IP-s input
 
-To simplify this task a [library file][3] with two helper functions was provided by the lectures. We configured the client tu receive the broadcasted UDP packages using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_.
+To simplify this task a [library file][3] with two helper functions was provided by the lectures. We configured the client to receive the broadcasted UDP packages using the function _int udp_client_setup(char *broadcast_address, int broadcast_port)_ contained in the library _udpclient.h_.
 
 Due to the fact that the network stream is received in 256 byte packages and one audio sample is only 4 byte big, we had to buffer the received data. We followed the provided hints and used a FIFO that is accessed from different threads to solve this problem.We created a FIFO with the [unnamed pipes][4] Linux implementation. Named pipes would have the advantage that they can be accessed from different processes, but thats not needed here, because the threads are sharing the same memory.
 In the main loop we received the packets from the server using the function _int udp_client_recv(unsigned *buffer,int buffer_size )_  and wrote them in the FIFO.
