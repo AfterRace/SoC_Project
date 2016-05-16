@@ -188,7 +188,7 @@ In the previous steps, we have already achieved to process streams from line in 
 For the hardware design part in vivado, we used the supplied [Audio Mixer IP][2]. Before adding the Audio Mixer IP into the design first we doubled the AXI to Audio IP, so we could get both streams from the driver. We connected the audio mixer output to the Audio IP output. The rest of the design has been kept same as in the previous step. We faced no problems during this implementation. The driver worked out of the box.
 
 ### Step 4: Adding Filters and Volume Control
-The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input, it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop. The user interface is designed very simple. We are just using the functions getchar() and scanf() to read the user input and control the flow throug varios conditional statements. The functionality of the user interface is explained in the [How to use it](#how-to-use-it) section.  
+The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. The final block design is shown in the picture below. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input, it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop. The user interface is designed very simple. We are just using the functions getchar() and scanf() to read the user input and control the flow throug varios conditional statements. The functionality of the user interface is explained in the [How to use it](#how-to-use-it) section.  
 
 The tasks are spread between the threads in the final driver as follows:
 - fifo_write_thread
@@ -199,7 +199,8 @@ The tasks are spread between the threads in the final driver as follows:
 	- reads samples from Audio to AXI device and writes them to AXI to Audio channel 1
 - main
 	- user interface 
-
+	
+![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/block-design-overall.png)
 
 ## Conclusion
 We successfly solved the tasks in the given time frame. For all implementation and test related acitvities we needed around 5 lab sessions a 2 hourse. All requirements are fullfiled and tested. We faced no serious problems during the implementation.
