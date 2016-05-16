@@ -203,7 +203,7 @@ The tasks are spread between the threads in the final driver as follows:
 ![alt tag](https://raw.githubusercontent.com/AfterRace/SoC_Project/master/pictures/block-design-overall.png)
 
 ## Conclusion
-We successfly solved the tasks in the given time frame. For all implementation and test related acitvities we needed around 5 lab sessions a 2 hourse. All requirements are fullfiled and tested. We faced no serious problems during the implementation.
+We successfly solved the tasks in the given time frame. For all implementation and test related acitvities we needed around 5 lab sessions a 2 hours. All requirements are fullfiled and tested. We faced no serious problems during the implementation. However the sound quality of the mixed stream is not satisfing. We guess that this is caused by the quality of the provided audio IP cores (volume control and filter) and not related to our implementation. 
 
 ## References
 
