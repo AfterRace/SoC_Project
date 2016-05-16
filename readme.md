@@ -183,14 +183,14 @@ During the implementation of this step we faced some problems with the writing a
 To test it, we need to configure the network interface of the zedboard properly. To simplify this we used the provided *change_ip_and_mac.sh* script, which is present in the same repository like the *updclient.h* library.
 
 ### Step 3: Mixing the Two Streams, Multi-Threading
-In this step of the project, we added a new IP which takes two audio streams as input and outputs a mixed stream that contains both inputs. The output is now connected to the zedaudio IP which is the final IP before the stream is released to the headphones.
-In previous steps, we have already achieved to process streams from line in and network seperately. Basically we merged for this step our previous two drivers together. Therefore we took the receive driver from step 2 and added a new thread that copies the samples like the copy driver did in step 1. 
+In this step of the project, we added a new IP which takes two audio streams as input and outputs a mixed stream. This output is now connected to the zedaudio IP which is the final IP before the stream is released to the headphones.
+In the previous steps, we have already achieved to process streams from line in and network seperately. Basically we merged for this step our previous two drivers together. Therefore we took the receive driver from step 2 and added a new thread that copies the samples like the copy driver did in step 1. 
 For the hardware design part in vivado, we used the supplied [Audio Mixer IP][2]. Before adding the Audio Mixer IP into the design first we doubled the AXI to Audio IP, so we could get both streams from the driver. We connected the audio mixer output to the Audio IP output. The rest of the design has been kept same as in the previous step. We faced no problems during this implementation. The driver worked out of the box.
 
 ### Step 4: Adding Filters and Volume Control
-The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop. The user interface is designed very simple. We are just using the functions getchar() and scanf() to read the user input and control the flow throug varios conditional statements. The functionality of the user interface is explained in the [How to use it](#how-to-use-it) section.  
+The final step of the project was to add a volume control and a filter bank in the signal path of both input channels. We reused the provided IP cores from the former [lab exercises 4][5]. On the software side we had to create a user interface that allows the user to control the settings of both IPs from the linux command line. Since the user interface is waitung on the user input, it is an additional concurrent acitivity in our program. Therefore we moved the receiving of the network packages to an additional thread and implemented the user interface in the main loop. The user interface is designed very simple. We are just using the functions getchar() and scanf() to read the user input and control the flow throug varios conditional statements. The functionality of the user interface is explained in the [How to use it](#how-to-use-it) section.  
 
-The tasks are spread between the threads as follows:
+The tasks are spread between the threads in the final driver as follows:
 - fifo_write_thread
 	- receives network packages and write them to the FIFO	
 - fifo_read_thread
@@ -202,7 +202,7 @@ The tasks are spread between the threads as follows:
 
 
 ## Conclusion
-We successfly solved the tasks in the given time frame. All requirements are fullfiled and tested. We faced no serious problems during the implementation.
+We successfly solved the tasks in the given time frame. For all implementation and test related acitvities we needed around 5 lab sessions a 2 hourse. All requirements are fullfiled and tested. We faced no serious problems during the implementation.
 
 ## References
 
